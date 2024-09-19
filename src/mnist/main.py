@@ -29,10 +29,10 @@ def hello():
     return {"msg":"hello"}
 
 
-def save_db(file, path):
-    print("call save_db")
-    current_time = datetime.datetime.now()
+def save_db(file, file_name, path, current_time):
+    # 데이터베이스에 저장할수 있도록 타임 포맷 지정
     formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+
 
     try:
         connection = pymysql.connect(
@@ -44,9 +44,7 @@ def save_db(file, path):
         )
         with connection.cursor() as cursor:
             sql = "INSERT INTO files (name, path, time, user) VALUES (%s, %s, %s, %s)"
-            
-            file_path = os.path.join(os.path.dirname(path), file.filename)
-            
+            file_path = os.path.join(os.path.dirname(path), file_name)
             cursor.execute(
                 sql, 
                 (
@@ -58,7 +56,6 @@ def save_db(file, path):
             )
         connection.commit()
     except Exception as e:
-        print("EXE")
         print(e)
         return {"error": str(e)}
     finally:
@@ -67,15 +64,27 @@ def save_db(file, path):
 
 @app.post("/photo")
 async def upload_photo(file: UploadFile):
+
+    #  시간 부터 구해야함
+    current_time = datetime.datetime.now()
+    unix_time = current_time.timestamp()
     upload_f = "data/images/"
+
+    # 업로드할 파일이 있는지 없는지 검사
     if not os.path.exists(upload_f):
         os.makedirs(upload_f)
     
+    # 업로드된 파일을 읽어 온다.
     content = await file.read()
-    filename = file.filename
-    with open(os.path.join(upload_f, filename), "wb") as fp:
+
+    # 파일 이름 변형
+    t_filename = str(unix_time)+"-" + file.filename
+
+    # 파일 저장
+    with open(os.path.join(upload_f, t_filename), "wb") as fp:
         fp.write(content)
 
-    save_db(file, upload_f)
+    # 데이터 베이스에도 파일에 대한 정보 저장
+    save_db(file, t_filename, upload_f, current_time)
 
-    return {"filename": filename, "content_type":file.content_type}
+    return {"filename": file.filename, "content_type":file.content_type}
