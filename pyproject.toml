@@ -26,8 +26,11 @@ test = [
     "pytest-cov>=5.0.0",
 ]
 
+[project.scripts]
+ml-worker = 'mnist.worker:run'
+
 [tool.pytest.ini_options]
-pythonpath = "src.mnist"
+pythonpath = "src"
 
 [tool.pdm]
 distribution = true
