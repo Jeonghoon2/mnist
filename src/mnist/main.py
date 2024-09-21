@@ -5,7 +5,7 @@ import datetime
 import os
 from fastapi.middleware.cors import CORSMiddleware
 import pymysql.cursors
-from src.mnist.utils.db import get_db_connection
+from utils.db import get_db_connection
 
 app = FastAPI()
 
