@@ -5,6 +5,7 @@ import datetime
 import os
 from fastapi.middleware.cors import CORSMiddleware
 import pymysql.cursors
+from utils.db import get_db_connection
 
 app = FastAPI()
 
@@ -26,16 +27,6 @@ app.add_middleware(
 username = "n20"
 
 
-def get_db_connection():
-    return pymysql.connect(
-        host=os.getenv("DB_IP", "localhost"),
-        port=int(os.getenv("DB_PORT", "43306")),
-        user="root",
-        password="1234",
-        database="mnistdb",
-    )
-
-
 @app.get("/")
 def hello():
     return {"msg": "hello"}
@@ -54,11 +45,8 @@ def save_db(file, file_name, path, current_time):
                                     file_name, 
                                     file_path, 
                                     request_time, 
-                                    request_user, 
-                                    prediction_model,
-                                    prediction_result,
-                                    prediction_time
-                                ) VALUES (%s, %s, %s, %s, %s, %s, %s)
+                                    request_user 
+                                ) VALUES (%s, %s, %s, %s)
                 """
             file_path = os.path.join(os.path.dirname(path), file_name)
             cursor.execute(
@@ -68,9 +56,6 @@ def save_db(file, file_name, path, current_time):
                     file_path,  # 저장 전체 경로 및 변환 파일명
                     formatted_time,  # 요청 시간
                     username,  # 요청 사용자
-                    "/n20",  # 예측 사용 모델
-                    "A",  # 예측 결과
-                    "2024-09-20 11:26:30",  # 예측 시간
                 ),
             )
         connection.commit()
