@@ -8,5 +8,5 @@ def get_db_connection():
         port=int(os.getenv("DB_PORT", "43306")),
         user=os.getenv("DB_USER", "root"),
         password=os.getenv("DB_PASSWORD", "1234"),
-        database=os.getenv("DB_DATABASE", "mnist"),
+        database=os.getenv("DB_DATABASE", "mnistdb"),
     )
