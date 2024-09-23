@@ -5,7 +5,7 @@ WORKDIR /code
 RUN apt update && apt install -y cron && apt install -y vim
 
 COPY ml-work-cronjob /etc/cron.d/ml-work-cronjob
-RUN chmod 0644 /etc/cron.d/ml-work-cronjob
+RUN crontab /etc/cron.d/ml-work-cronjob
 
 COPY src/mnist/ /code/
 
