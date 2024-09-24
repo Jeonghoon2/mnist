@@ -76,7 +76,7 @@ async def upload_photo(file: UploadFile):
     #  시간 부터 구해야함
     current_time = datetime.datetime.now()
     unix_time = current_time.timestamp()
-    upload_f = "./data/images/"
+    upload_f = os.getenv("UPLOAD_DIR", "./data/images/")
 
     # 업로드할 파일이 있는지 없는지 검사
     if not os.path.exists(upload_f):
