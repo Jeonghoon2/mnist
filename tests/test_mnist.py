@@ -1,5 +1,6 @@
 from mnist.worker import get_pr_is_null, update_data, run
 from mnist.utils.util import get_now_time
+from mnist.worker import predict_image
 import requests
 
 
@@ -36,8 +37,19 @@ import requests
 #         print(e)
 
 
-def test_run():
-
+def test_predict():
     import os
 
-    run()
+    file_dir = __file__
+    path = os.path.dirname(file_dir)
+    full_path = os.path.join(path, "nine_image.png")
+    print("=" * 33)
+    print(predict_image("./note/train_img/9_59910.png"))
+    print("=" * 33)
+
+
+# def test_run():
+
+#     # import os
+
+#     run()
