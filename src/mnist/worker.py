@@ -40,6 +40,7 @@ def get_pr_is_null():
         SELECT *
         FROM image_processing
         WHERE prediction_result IS NULL
+        AND request_user='n20'
         LIMIT 1
         """
     return execute_sql(sql, fetchone=True)
@@ -77,7 +78,7 @@ def update_data(data):
         WHERE num = %s
         """
 
-    params = ("model", digit, current_time, idx)
+    params = (model_name, digit, current_time, idx)
     if execute_sql(sql, params, is_commit=True):
         return current_time, digit  # 업데이트 성공 시 반환
     else:
