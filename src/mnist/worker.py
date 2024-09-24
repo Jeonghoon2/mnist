@@ -3,10 +3,19 @@ from mnist.utils.db import get_db_connection
 from mnist.utils.util import get_now_time
 import random
 import requests
+import numpy as np
+from PIL import Image
+from keras.models import load_model
 import os
 
 api_url = "https://notify-api.line.me/api/notify"
 token = os.getenv("LINE_TOKEN")
+
+file_path = __file__
+file_dir = os.path.dirname(file_path)
+model_name = "mnist240924.keras"
+model_path = os.path.join(file_dir, "mnist240924.keras")
+model = load_model(model_path)
 
 
 # SQL 처리
@@ -36,11 +45,30 @@ def get_pr_is_null():
     return execute_sql(sql, fetchone=True)
 
 
+def predict_image(image_path):
+    img = Image.open(image_path).convert("L")  # 흑백 이미지로 변환
+    img = img.resize((28, 28))  # 크기 조정
+
+    # 흑백 반전
+    img = np.array(img)  # 흑백 반전
+
+    img = np.array(img)
+    img = img.reshape(1, 28, 28, 1)  # 모델 입력 형태에 맞게 변형
+    img = img / 255.0  # 정규화
+
+    prediction = model.predict(img)
+    digit = np.argmax(prediction)
+    return digit
+
+
 # Null인 데이터 업데이트
 def update_data(data):
     idx = data[0]
-    v = random.randrange(0, 9)
+
+    digit = predict_image(data[2])
+
     current_time = get_now_time()
+
     sql = """
         UPDATE image_processing
         SET prediction_model = %s,
@@ -48,9 +76,10 @@ def update_data(data):
             prediction_time = %s
         WHERE num = %s
         """
-    params = ("model", v, current_time, idx)
+
+    params = ("model", digit, current_time, idx)
     if execute_sql(sql, params, is_commit=True):
-        return current_time, v  # 업데이트 성공 시 반환
+        return current_time, digit  # 업데이트 성공 시 반환
     else:
         return None, None
 
@@ -91,7 +120,7 @@ def run():
             # LINE 으로 처리 결과 전송
             message_txt = f"""[Worker 알림]\n
 🚀  {data[0]}번째의 데이터 Update!
-1️⃣  prediction_model : {data[5]} -> model
+1️⃣  prediction_model : {data[5]} -> {model_name}
 2️⃣  tprediction_result : {data[6]} -> {pr_result}
 3️⃣  prediction_time : {data[7]} -> {pr_time}
 """
